@@ -1,0 +1,5 @@
+{
+  "mild": {"label": "Mild", "guidance": "Stay close to the base concept; change composition or lighting subtly.", "rank": 1},
+  "normal": {"label": "Normal", "guidance": "Introduce a clear visual twist while preserving the base subject and intent.", "rank": 2},
+  "wild": {"label": "Wild", "guidance": "Make a bold, surprising conceptual leap while retaining one recognizable anchor.", "rank": 3}
+}

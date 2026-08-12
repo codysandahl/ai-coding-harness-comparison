@@ -1,0 +1,14 @@
+{
+  "mild": {
+    "temperature": 0.3,
+    "top_p": 0.9
+  },
+  "normal": {
+    "temperature": 0.6,
+    "top_p": 0.85
+  },
+  "wild": {
+    "temperature": 0.9,
+    "top_p": 0.7
+  }
+}

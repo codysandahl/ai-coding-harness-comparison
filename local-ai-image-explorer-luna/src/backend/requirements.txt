@@ -1,0 +1,2 @@
+# Dependencies are managed by pyproject.toml with uv.
+# Use: uv sync --dev
