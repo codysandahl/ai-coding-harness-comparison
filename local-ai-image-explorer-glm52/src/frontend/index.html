@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local AI Image Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Fira+Sans:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="app-nav">
+  <span class="logo">Local AI Image Explorer</span>
+  <div class="nav-status">
+    <span class="status-dot" id="status-dot"></span>
+    <span id="status-text">Paused</span>
+  </div>
+</header>
+
+<div class="app-body">
+
+  <aside class="control-panel">
+    <h2 class="panel-heading">Controls</h2>
+
+    <div class="field">
+      <label class="field-label" for="text-model">Text Model</label>
+      <select id="text-model"><option disabled>loading…</option></select>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="image-model">Image Model</label>
+      <select id="image-model"><option disabled>loading…</option></select>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="creativity">Creativity</label>
+      <select id="creativity"></select>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="base-prompt">Base Prompt</label>
+      <textarea id="base-prompt">a lighthouse at dusk, oil painting</textarea>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="remix-phrases">Remix Phrases</label>
+      <textarea id="remix-phrases">dramatic clouds
+golden hour
+storm approaching</textarea>
+      <div class="field-hint">One per line — mixed into each new generation</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="field-row">
+      <div class="field">
+        <label class="field-label" for="width">Width</label>
+        <input id="width" type="number" value="1024" step="64" min="1024">
+      </div>
+      <div class="field">
+        <label class="field-label" for="height">Height</label>
+        <input id="height" type="number" value="1024" step="64" min="1024">
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="seed">Seed</label>
+      <input id="seed" type="text" placeholder="random">
+      <div class="field-hint">Recorded with each image; leave blank for a fresh value each generation</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="button-row">
+      <button class="btn-ghost" id="btn-play" type="button">Play</button>
+      <button class="btn-ghost is-active" id="btn-pause" type="button">Pause</button>
+    </div>
+  </aside>
+
+  <main class="grid-panel">
+    <h1 class="grid-heading">Explorations</h1>
+    <div class="error-banner" id="error-banner"></div>
+    <div class="image-grid" id="image-grid"></div>
+  </main>
+
+</div>
+
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-card">
+    <img class="lightbox-img" id="lb-img" alt="">
+    <div class="lightbox-meta">
+      <h2>Generation</h2>
+      <div id="lb-meta"></div>
+      <div class="lightbox-actions">
+        <button class="btn-ghost" id="lb-use" type="button">Use as Base Prompt</button>
+        <button class="btn-ghost" id="lb-download" type="button">Download</button>
+      </div>
+    </div>
+  </div>
+  <button class="lightbox-close" id="lb-close" type="button" aria-label="Close">×</button>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

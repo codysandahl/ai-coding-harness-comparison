@@ -1,0 +1,29 @@
+# Creativity levels — editable without touching application code.
+# Raising a level must produce a consistent, noticeable increase in how far
+# the generated prompt diverges from the base prompt + remix phrases.
+# `guidance` is injected into the system prompt and tells the model how far
+# it may roam; it is the sole divergence lever so this works with any model
+# (reasoning models often reject sampling params like temperature/top_p).
+levels:
+  - id: mild
+    label: Mild
+    guidance: >
+      Produce a single image prompt that stays very close to the base prompt.
+      Combine the base prompt with ONE chosen remix phrase and only minor,
+      conservative descriptive additions. Do not introduce new subjects,
+      settings, or styles beyond what is already implied.
+  - id: normal
+    label: Normal
+    guidance: >
+      Produce a single image prompt built on the base prompt and one or two
+      remix phrases. You may add complementary descriptive detail (lighting,
+      mood, composition, texture) that fits the existing subject. Avoid
+      introducing entirely new central subjects.
+  - id: wild
+    label: Wild
+    guidance: >
+      Produce a single image prompt that uses the base prompt and remix
+      phrases only as a loose starting point. Freely reinterpret the scene:
+      shift setting, style, mood, palette, and even the central subject
+      toward something surprising but still visually related. Push far from
+      the literal base prompt.

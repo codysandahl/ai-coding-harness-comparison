@@ -1,0 +1,2 @@
+# Dependencies are declared in pyproject.toml and managed by uv.
+# This file is kept only for editors/tools that expect it; do not edit here.
