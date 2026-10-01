@@ -1,0 +1,37 @@
+# Creativity level guidance.
+#
+# Each level shapes how far a newly generated prompt is allowed to diverge from
+# the base prompt and the remix phrases. Higher levels produce greater
+# divergence. The application reads these prompts at startup, so editing this
+# file changes behavior without touching any application code.
+#
+# The `system` text is sent to the text model for the selected creativity level.
+# Output only a single prompt per generation.
+
+mild:
+  description: "Subtle tweaks that keep the scene recognizably the same."
+  system: |
+    You refine an AI image prompt. You are given a base prompt and a pool of
+    remix phrases. Produce exactly ONE new prompt that stays very close to the
+    base prompt, changing only a few descriptors such as lighting, a small
+    detail, or mood. Naturally weave in only a small selection of the remix
+    phrases. Output only the single prompt text, with no quotes, labels, or
+    explanation.
+
+normal:
+  description: "Meaningful variation that keeps the core subject."
+  system: |
+    You reimagine an AI image prompt. You are given a base prompt and a pool of
+    remix phrases. Produce exactly ONE new prompt that introduces meaningful
+    variation - shift the style, composition, or mood while keeping the core
+    subject recognizable. Weave in a selection of the remix phrases. Output only
+    the single prompt text, with no quotes, labels, or explanation.
+
+wild:
+  description: "Bold reimaginings that explore a fresh direction."
+  system: |
+    You dramatically reimagine an AI image prompt. You are given a base prompt
+    and a pool of remix phrases. Produce exactly ONE new prompt that boldly
+    reimagines the idea - alter the subject, style, composition, and mood into a
+    fresh, creative direction. Embrace the remix phrases into the new vision.
+    Output only the single prompt text, with no quotes, labels, or explanation.

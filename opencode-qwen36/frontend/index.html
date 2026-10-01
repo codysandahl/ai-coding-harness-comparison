@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local AI Image Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Fira+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #1A1A1A;
+      --color-secondary: #666666;
+      --color-tertiary: #8A8A8A;
+      --color-neutral: #FFFFFF;
+      --color-surface: #EEEEEE;
+      --color-border: rgba(181, 181, 181, 0.3);
+      --color-accent: #1A1A1A;
+
+      --font-display: "Playfair Display", serif;
+      --font-body: "Fira Sans", Arial, sans-serif;
+
+      --space-3xs: 4px;
+      --space-2xs: 8px;
+      --space-xs: 12px;
+      --space-sm: 16px;
+      --space-md: 24px;
+      --space-lg: 32px;
+      --space-xl: 48px;
+      --space-2xl: 64px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--color-surface);
+      color: var(--color-primary);
+      min-height: 100vh;
+    }
+
+    /* ---------- Nav ---------- */
+    .app-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 56px;
+      background: var(--color-neutral);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-lg);
+    }
+
+    .logo {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--color-primary);
+    }
+
+    .nav-status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2xs);
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-secondary);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-tertiary);
+      transition: background 0.2s;
+    }
+
+    .status-dot.active {
+      background: #22c55e;
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.paused {
+      background: #f59e0b;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* ---------- Layout ---------- */
+    .app-body {
+      display: flex;
+      gap: var(--space-lg);
+      padding: var(--space-lg);
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* ---------- Control Panel ---------- */
+    .control-panel {
+      flex: 0 0 300px;
+      background: var(--color-neutral);
+      padding: var(--space-lg);
+      border-radius: 0;
+      height: fit-content;
+      position: sticky;
+      top: 56px;
+    }
+
+    .panel-heading {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.05em;
+      margin-bottom: var(--space-md);
+    }
+
+    .field {
+      margin-bottom: var(--space-md);
+    }
+
+    .field-label {
+      display: block;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--color-secondary);
+      margin-bottom: var(--space-2xs);
+    }
+
+    .field-row {
+      display: flex;
+      gap: var(--space-sm);
+    }
+
+    .field-row .field {
+      flex: 1;
+      min-width: 0;
+    }
+
+    select,
+    input[type="number"],
+    input[type="text"],
+    textarea {
+      width: 100%;
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--color-primary);
+      background: var(--color-neutral);
+      border: 1px solid var(--color-border);
+      padding: var(--space-xs);
+      border-radius: 0;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus,
+    input:focus,
+    textarea:focus {
+      border-color: var(--color-primary);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .field-hint {
+      font-size: 0.7rem;
+      color: var(--color-tertiary);
+      margin-top: var(--space-2xs);
+    }
+
+    hr.divider {
+      border: none;
+      border-top: 1px solid var(--color-border);
+      margin: var(--space-md) 0;
+    }
+
+    .button-row {
+      display: flex;
+      gap: var(--space-sm);
+    }
+
+    .btn {
+      flex: 1;
+      padding: var(--space-xs) var(--space-md);
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border: 1px solid var(--color-border);
+      background: var(--color-neutral);
+      color: var(--color-primary);
+      cursor: pointer;
+      border-radius: 0;
+      transition: all 0.15s;
+    }
+
+    .btn:hover {
+      background: var(--color-surface);
+    }
+
+    .btn.is-active {
+      background: var(--color-primary);
+      color: var(--color-neutral);
+      border-color: var(--color-primary);
+    }
+
+    .btn-download {
+      width: 100%;
+      margin-top: var(--space-sm);
+    }
+
+    /* ---------- Grid Panel ---------- */
+    .grid-panel {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .grid-heading {
+      font-family: var(--font-display);
+      font-size: 1.7rem;
+      font-weight: 400;
+      letter-spacing: -0.005em;
+      margin-bottom: var(--space-md);
+    }
+
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: var(--space-lg) var(--space-md);
+    }
+
+    .card-post {
+      background: var(--color-neutral);
+      color: var(--color-primary);
+    }
+
+    .card-image {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      background: var(--color-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-image svg {
+      width: 40px;
+      height: 40px;
+      stroke: var(--color-tertiary);
+    }
+
+    .card-image .use-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(26, 26, 26, 0.82);
+      color: var(--color-neutral);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-align: center;
+      padding: var(--space-sm);
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    .card-image:hover .use-overlay {
+      opacity: 1;
+    }
+
+    .card-eyebrow {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--color-tertiary);
+      margin-top: var(--space-sm);
+    }
+
+    .card-prompt {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--color-secondary);
+      margin-top: var(--space-3xs);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* ---------- Lightbox ---------- */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.9);
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-xl);
+    }
+
+    .lightbox.is-open {
+      display: flex;
+    }
+
+    .lightbox-content {
+      max-width: 90vw;
+      max-height: 90vh;
+      position: relative;
+    }
+
+    .lightbox-content img {
+      max-width: 100%;
+      max-height: 85vh;
+      object-fit: contain;
+      display: block;
+    }
+
+    .lightbox-info {
+      color: var(--color-neutral);
+      text-align: center;
+      margin-top: var(--space-md);
+    }
+
+    .lightbox-prompt {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.8);
+      max-width: 600px;
+      margin: 0 auto var(--space-sm);
+    }
+
+    .lightbox-meta {
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: -40px;
+      right: 0;
+      background: none;
+      border: none;
+      color: var(--color-neutral);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: var(--space-xs);
+    }
+
+    .lightbox-download {
+      display: inline-block;
+      margin-top: var(--space-sm);
+      padding: var(--space-xs) var(--space-md);
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--color-neutral);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .lightbox-download:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* ---------- Error State ---------- */
+    .error-banner {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: var(--space-sm) var(--space-md);
+      margin-bottom: var(--space-md);
+      font-size: 0.8rem;
+      display: none;
+    }
+
+    .error-banner.is-visible {
+      display: block;
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 1024px) {
+      .app-body {
+        padding: var(--space-md);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .app-body {
+        flex-direction: column;
+      }
+
+      .control-panel {
+        flex: 1 1 auto;
+        width: 100%;
+        position: static;
+      }
+
+      .image-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      }
+    }
+
+    @media (max-width: 680px) {
+      .app-nav {
+        padding: 0 var(--space-md);
+      }
+
+      .app-body {
+        padding: var(--space-md);
+      }
+
+      .image-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-sm);
+      }
+    }
+
+    /* ---------- Loading State ---------- */
+    .loading-indicator {
+      display: none;
+      text-align: center;
+      padding: var(--space-xl);
+      color: var(--color-tertiary);
+      font-size: 0.8rem;
+    }
+
+    .loading-indicator.is-visible {
+      display: block;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--color-border);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto var(--space-sm);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ---------- Empty State ---------- */
+    .empty-state {
+      text-align: center;
+      padding: var(--space-2xl);
+      color: var(--color-tertiary);
+    }
+
+    .empty-state p {
+      font-size: 0.9rem;
+    }
+
+    .lightbox-actions {
+      display: flex;
+      gap: var(--space-sm);
+      justify-content: center;
+      margin-top: var(--space-sm);
+    }
+
+    .lightbox-actions .btn,
+    .lightbox-actions .lightbox-download {
+      font-size: 0.75rem;
+      padding: var(--space-xs) var(--space-sm);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="app-nav">
+    <span class="logo">Local AI Image Explorer</span>
+    <div class="nav-status">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">Ready</span>
+    </div>
+  </header>
+
+  <div class="app-body">
+
+    <aside class="control-panel">
+      <h2 class="panel-heading">Controls</h2>
+
+      <div class="error-banner" id="error-banner"></div>
+
+      <div class="field">
+        <label class="field-label" for="text-model">Text Model</label>
+        <select id="text-model">
+          <option value="">Loading...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="image-model">Image Model</label>
+        <select id="image-model">
+          <option value="">Loading...</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="base-prompt">Base Prompt</label>
+        <textarea id="base-prompt" placeholder="A forest at dawn, misty atmosphere">A forest at dawn, misty atmosphere</textarea>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="creativity">Creativity Level</label>
+        <select id="creativity">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="remix-phrases">Remix Phrases</label>
+        <textarea id="remix-phrases" placeholder="One phrase per line">misty atmosphere
+golden light
+dappled shadows</textarea>
+        <div class="field-hint">One phrase per line — incorporated into each generation</div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="size">Size</label>
+          <select id="size">
+            <option value="1024x1024">1024×1024</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="seed">Seed (optional)</label>
+        <input id="seed" type="text" placeholder="Random if empty">
+      </div>
+
+      <hr class="divider">
+
+      <div class="button-row">
+        <button class="btn is-active" id="btn-pause" type="button">Pause</button>
+        <button class="btn" id="btn-play" type="button">Play</button>
+      </div>
+
+      <div class="loading-indicator" id="loading-indicator">
+        <div class="spinner"></div>
+        <span>Generating...</span>
+      </div>
+    </aside>
+
+    <main class="grid-panel">
+      <h2 class="grid-heading">Explorations</h2>
+      <div class="error-banner" id="grid-error-banner"></div>
+      <div class="image-grid" id="image-grid">
+        <div class="empty-state">
+          <p>Click Play to start generating images</p>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <div class="lightbox-content">
+      <button class="lightbox-close" id="lightbox-close">&times;</button>
+      <img id="lightbox-img" src="" alt="Generated image">
+      <div class="lightbox-info">
+        <p class="lightbox-prompt" id="lightbox-prompt"></p>
+        <p class="lightbox-meta" id="lightbox-meta"></p>
+        <div class="lightbox-actions">
+          <button class="btn" id="btn-set-base-prompt">Set as Base Prompt</button>
+          <a class="lightbox-download" id="lightbox-download" href="#" download>Download</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+
+    const elements = {
+      textModel: document.getElementById("text-model"),
+      imageModel: document.getElementById("image-model"),
+      basePrompt: document.getElementById("base-prompt"),
+      creativity: document.getElementById("creativity"),
+      remixPhrases: document.getElementById("remix-phrases"),
+      size: document.getElementById("size"),
+      seed: document.getElementById("seed"),
+      btnPause: document.getElementById("btn-pause"),
+      btnPlay: document.getElementById("btn-play"),
+      statusDot: document.getElementById("status-dot"),
+      statusText: document.getElementById("status-text"),
+      imageGrid: document.getElementById("image-grid"),
+      errorBanner: document.getElementById("error-banner"),
+      gridErrorBanner: document.getElementById("grid-error-banner"),
+      lightbox: document.getElementById("lightbox"),
+      lightboxImg: document.getElementById("lightbox-img"),
+      lightboxPrompt: document.getElementById("lightbox-prompt"),
+      lightboxMeta: document.getElementById("lightbox-meta"),
+      lightboxClose: document.getElementById("lightbox-close"),
+      lightboxDownload: document.getElementById("lightbox-download"),
+      btnSetBasePrompt: document.getElementById("btn-set-base-prompt"),
+      loadingIndicator: document.getElementById("loading-indicator"),
+    };
+
+    let isGenerating = false;
+    let eventSource = null;
+    let storedImages = [];
+
+    async function fetchJSON(url, options = {}) {
+      try {
+        const resp = await fetch(url, options);
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({ detail: resp.statusText }));
+          throw new Error(err.detail || resp.statusText);
+        }
+        return resp.json();
+      } catch (err) {
+        showError(err.message);
+        throw err;
+      }
+    }
+
+    function showError(msg) {
+      elements.errorBanner.textContent = msg;
+      elements.errorBanner.classList.add("is-visible");
+      setTimeout(() => {
+        elements.errorBanner.classList.remove("is-visible");
+      }, 5000);
+    }
+
+    function showGridError(msg) {
+      elements.gridErrorBanner.textContent = msg;
+      elements.gridErrorBanner.classList.add("is-visible");
+    }
+
+    function setStatus(status) {
+      if (status === "generating") {
+        elements.statusDot.className = "status-dot active";
+        elements.statusText.textContent = "Generating";
+      } else if (status === "paused") {
+        elements.statusDot.className = "status-dot paused";
+        elements.statusText.textContent = "Paused";
+      } else {
+        elements.statusDot.className = "status-dot";
+        elements.statusText.textContent = "Ready";
+      }
+    }
+
+    async function loadModels() {
+      try {
+        const data = await fetchJSON(`${API_BASE}/models`);
+        elements.textModel.innerHTML = "";
+        elements.imageModel.innerHTML = "";
+
+        const textModels = data.text_models || [];
+        const imageModels = data.image_models || [];
+
+        if (textModels.length === 0) {
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "No text models found";
+          elements.textModel.appendChild(opt);
+        } else {
+          textModels.forEach((m) => {
+            const opt = document.createElement("option");
+            opt.value = m;
+            opt.textContent = m;
+            elements.textModel.appendChild(opt);
+          });
+        }
+
+        if (imageModels.length === 0) {
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "No image models found";
+          elements.imageModel.appendChild(opt);
+        } else {
+          imageModels.forEach((m) => {
+            const opt = document.createElement("option");
+            opt.value = m;
+            opt.textContent = m;
+            elements.imageModel.appendChild(opt);
+          });
+        }
+
+        if (textModels.length > 0 && !elements.textModel.value) {
+          elements.textModel.value = textModels[0];
+        }
+        if (imageModels.length > 0 && !elements.imageModel.value) {
+          elements.imageModel.value = imageModels[0];
+        }
+      } catch (err) {
+        console.error("Failed to load models:", err);
+      }
+    }
+
+    async function loadImages() {
+      try {
+        const data = await fetchJSON(`${API_BASE}/images?limit=50`);
+        storedImages = data;
+        renderImages();
+      } catch (err) {
+        showGridError("Failed to load images");
+      }
+    }
+
+    function renderImages() {
+      if (storedImages.length === 0) {
+        elements.imageGrid.innerHTML = `
+          <div class="empty-state">
+            <p>${isGenerating ? "Generating images..." : "Click Play to start generating images"}</p>
+          </div>
+        `;
+        return;
+      }
+
+      elements.imageGrid.innerHTML = storedImages
+        .map((img) => createCardHTML(img))
+        .join("");
+
+      elements.imageGrid.querySelectorAll(".card-image").forEach((el) => {
+        el.addEventListener("click", () => openLightbox(el.dataset.id));
+      });
+    }
+
+    function createCardHTML(img) {
+      return `
+        <div class="card-post">
+          <div class="card-image" data-id="${img.id}">
+            <img src="${img.url}" alt="${img.prompt}" loading="lazy">
+            <div class="use-overlay">Use as Base Prompt</div>
+          </div>
+          <div class="card-eyebrow">${img.model} · ${img.size} · seed ${img.seed}</div>
+          <div class="card-prompt">${escapeHtml(img.prompt)}</div>
+        </div>
+      `;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function startGeneration() {
+      const basePrompt = elements.basePrompt.value.trim();
+      if (!basePrompt) {
+        showError("Please enter a base prompt");
+        return;
+      }
+
+      isGenerating = true;
+      setStatus("generating");
+      elements.loadingIndicator.classList.add("is-visible");
+      elements.btnPause.classList.add("is-active");
+      elements.btnPlay.classList.remove("is-active");
+
+      const creativity = elements.creativity.value;
+      const remixText = elements.remixPhrases.value.trim();
+      const remixPhrases = remixText ? remixText.split("\n").filter((p) => p.trim()) : [];
+      const size = elements.size.value;
+      const textModel = elements.textModel.value;
+      const imageModel = elements.imageModel.value;
+      const seedVal = elements.seed.value.trim();
+      const seed = seedVal ? parseInt(seedVal, 10) : null;
+
+      const params = new URLSearchParams({
+        base_prompt: basePrompt,
+        creativity: creativity,
+        size: size,
+        text_model: textModel,
+        image_model: imageModel,
+      });
+
+      if (remixPhrases.length > 0) {
+        remixPhrases.forEach((p) => params.append("remix_phrases", p.trim()));
+      }
+      if (seed) {
+        params.set("seed_override", seed);
+      }
+
+      eventSource = new EventSource(`${API_BASE}/generate-stream?${params.toString()}`);
+
+      eventSource.addEventListener("image", (e) => {
+        try {
+          const img = JSON.parse(e.data);
+          storedImages.unshift(img);
+          renderImages();
+          elements.loadingIndicator.classList.remove("is-visible");
+        } catch (parseErr) {
+          console.error("Failed to parse image event:", e.data);
+        }
+      });
+
+      eventSource.addEventListener("error", (e) => {
+        try {
+          const err = JSON.parse(e.data);
+          showGridError(err.error || "Generation error");
+        } catch (parseErr) {
+          showGridError("Generation error");
+        }
+        elements.loadingIndicator.classList.remove("is-visible");
+      });
+
+      eventSource.addEventListener("stopped", () => {
+        isGenerating = false;
+        setStatus("paused");
+        elements.loadingIndicator.classList.remove("is-visible");
+        elements.btnPause.classList.remove("is-active");
+        elements.btnPlay.classList.add("is-active");
+      });
+
+      eventSource.onerror = () => {
+        eventSource.close();
+        isGenerating = false;
+        setStatus("paused");
+        elements.loadingIndicator.classList.remove("is-visible");
+        elements.btnPause.classList.remove("is-active");
+        elements.btnPlay.classList.add("is-active");
+        showGridError("Connection lost. Click Play to retry.");
+      };
+    }
+
+    function stopGeneration() {
+      isGenerating = false;
+      if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+      }
+      fetch(`${API_BASE}/pause`, { method: "POST" });
+      setStatus("paused");
+      elements.loadingIndicator.classList.remove("is-visible");
+      elements.btnPause.classList.remove("is-active");
+      elements.btnPlay.classList.add("is-active");
+    }
+
+    function openLightbox(imageId) {
+      const img = storedImages.find((i) => i.id === imageId);
+      if (!img) return;
+
+      elements.lightboxImg.src = img.url;
+      elements.lightboxPrompt.textContent = img.prompt;
+      elements.lightboxMeta.textContent = `${img.model} · ${img.size} · seed ${img.seed} · ${img.creativity}`;
+      elements.lightboxDownload.href = `${API_BASE}/download/${img.id}`;
+      elements.lightbox.classList.add("is-open");
+    }
+
+    function closeLightbox() {
+      elements.lightbox.classList.remove("is-open");
+    }
+
+    async function updateBasePrompt(imageId) {
+      try {
+        const resp = await fetch(`${API_BASE}/images/${imageId}/use-as-prompt`, { method: "POST" });
+        if (!resp.ok) throw new Error("Failed to update prompt");
+        const data = await resp.json();
+        elements.basePrompt.value = data.prompt;
+        elements.textModel.value = data.model || "";
+        elements.size.value = data.size || "1024x1024";
+        if (data.seed) elements.seed.value = data.seed;
+        if (data.creativity) elements.creativity.value = data.creativity;
+        closeLightbox();
+        if (isGenerating) stopGeneration();
+      } catch (err) {
+        console.error("Failed to update base prompt:", err);
+        showError("Failed to update base prompt");
+      }
+    }
+
+    // Event listeners
+    elements.btnPause.addEventListener("click", stopGeneration);
+
+    elements.btnPlay.addEventListener("click", () => {
+      if (!isGenerating) {
+        fetch(`${API_BASE}/resume`, { method: "POST" });
+        startGeneration();
+      }
+    });
+
+    elements.lightboxClose.addEventListener("click", closeLightbox);
+
+    elements.lightbox.addEventListener("click", (e) => {
+      if (e.target === elements.lightbox) closeLightbox();
+    });
+
+    elements.btnSetBasePrompt.addEventListener("click", () => {
+      const img = storedImages.find((i) => i.url === elements.lightboxImg.src);
+      if (img) updateBasePrompt(img.id);
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeLightbox();
+    });
+
+    elements.basePrompt.addEventListener("input", () => {
+      if (isGenerating) {
+        stopGeneration();
+      }
+    });
+
+    // Initialize
+    loadModels();
+    loadImages();
+
+    setInterval(() => {
+      if (!isGenerating) {
+        loadImages();
+      }
+    }, 10000);
+  </script>
+
+</body>
+</html>

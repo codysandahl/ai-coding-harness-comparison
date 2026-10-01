@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local AI Image Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Fira+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="app-nav">
+    <span class="logo">Local AI Image Explorer</span>
+    <div class="nav-status">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">Paused</span>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <aside class="control-panel">
+      <h2 class="panel-heading">Controls</h2>
+
+      <div class="field">
+        <label class="field-label" for="text-model">Text Model</label>
+        <select id="text-model"></select>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="image-model">Image Model</label>
+        <select id="image-model"></select>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="base-prompt">Base Prompt</label>
+        <textarea id="base-prompt" placeholder="a lighthouse at dusk, oil painting"></textarea>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="remix-phrases">Remix Phrases</label>
+        <textarea id="remix-phrases" placeholder="one phrase per line"></textarea>
+        <div class="field-hint">One per line — mixed into each new generation</div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="creativity">Creativity</label>
+        <select id="creativity"></select>
+        <div class="field-hint" id="creativity-hint"></div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label" for="width">Width</label>
+          <input id="width" type="number" value="1024" step="64">
+        </div>
+        <div class="field">
+          <label class="field-label" for="height">Height</label>
+          <input id="height" type="number" value="1024" step="64">
+        </div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="button-row">
+        <button class="btn-ghost" id="btn-play" type="button">Play</button>
+        <button class="btn-ghost is-active" id="btn-pause" type="button">Pause</button>
+      </div>
+    </aside>
+
+    <main class="grid-panel">
+      <h1 class="grid-heading">Explorations</h1>
+      <div class="image-grid" id="image-grid"></div>
+    </main>
+  </div>
+
+  <div class="lightbox" id="lightbox" hidden>
+    <div class="lightbox-inner">
+      <div class="lightbox-image-wrap">
+        <img id="lightbox-img" alt="">
+      </div>
+      <div class="lightbox-meta">
+        <div class="lightbox-prompt" id="lightbox-prompt"></div>
+        <dl class="lightbox-fields">
+          <div><dt>Model</dt><dd id="lb-model"></dd></div>
+          <div><dt>Size</dt><dd id="lb-size"></dd></div>
+          <div><dt>Creativity</dt><dd id="lb-creativity"></dd></div>
+        </dl>
+        <div class="lightbox-actions">
+          <button class="btn-ghost" id="lb-use" type="button">Use as Base Prompt</button>
+          <a class="btn-ghost" id="lb-download" href="#" download>Download</a>
+          <button class="btn-ghost" id="lb-close" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "levels": {
+    "low": {
+      "divergence": "minimal",
+      "system_prompt": "Make small word-level changes to the base prompt. Preserve the original structure and subject."
+    },
+    "medium": {
+      "divergence": "moderate",
+      "system_prompt": "Rephrase the prompt more substantially. Add or remove descriptive elements while keeping the core subject."
+    },
+    "high": {
+      "divergence": "significant",
+      "system_prompt": "Diverge noticeably from the base prompt. Introduce new imagery, settings, or styles while preserving the core subject."
+    }
+  }
+}
