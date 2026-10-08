@@ -1,0 +1,5 @@
+{
+  "mild": "Stay close to the base prompt. Use the remix phrases as light additions. Keep the subject, setting and style of the base prompt intact.",
+  "normal": "Blend the base prompt with the remix phrases. Change the setting, mood or composition noticeably, but keep the core subject of the base prompt.",
+  "wild": "Diverge boldly from the base prompt. Reinterpret the subject, style and setting using the remix phrases as seeds for unexpected directions. Still produce one coherent image prompt."
+}
